@@ -23,7 +23,9 @@ allprojects {
         maven { url "https://maven.google.com" }
         maven { url 'https://jitpack.io' }
         maven { url "http://dl.bintray.com/lukaville/maven" }
-
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 
