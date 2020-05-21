@@ -1,10 +1,7 @@
 package com.bikersmode.fragments
 
-import android.Manifest
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,101 +14,52 @@ import android.content.ComponentName
 import android.widget.TextView
 import com.bikersmode.braodcastreciever.CallBaring
 import android.app.ActivityManager
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import com.bikersmode.MainActivity
-import com.bikersmode.SplashActivity
+import android.content.Intent
+import androidx.fragment.app.Fragment
+import com.bikersmode.RouteActivity
 import com.bikersmode.utility.Utils
 
 
 /**
  * A fragment with a Google +1 button.
- * Activities that contain this fragment must implement the
- * [BikersMainFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
  * Use the [BikersMainFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BikersMainFragment : Fragment() {
-    // TODO: Rename and change types of parameters
+class BikersMainFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
     private var mParam1: String? = null
     private var mParam2: String? = null
     private var mPlusOneButton: Button? = null
+    private var mPlusTwoButton: Button? = null
     private var mHint: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            mParam1 = arguments.getString(ARG_PARAM1)
-            mParam2 = arguments.getString(ARG_PARAM2)
+            mParam1 = arguments!!.getString(ARG_PARAM1)
+            mParam2 = arguments!!.getString(ARG_PARAM2)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         // Inflate the layout for this fragment
-        val view = inflater!!.inflate(R.layout.fragment_bikers_main, container, false)
-
-        //Find the +1 button
-        mPlusOneButton = view.findViewById<View>(R.id.plus_one_button) as Button
-        mHint = view.findViewById<View>(R.id.tv_hint) as TextView
-
-        return view
+        return inflater.inflate(R.layout.fragment_bikers_main, container, false)
     }
 
-    override fun onResume() {
-        super.onResume()
-        onButtonPressed()
-        onButtonLongPressed()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUi()
     }
 
-    // TODO: Rename button and start stop the mode
-    private fun onButtonPressed() {
-        mPlusOneButton?.setOnClickListener {
-            if (checkAndRequestPermissions()) {
-                if (mPlusOneButton?.text!!.toString() == getString(R.string.start)) {
-                    Utils.Companion.isBackAllow = false
-                    mPlusOneButton?.text = getString(R.string.stop)
-                    enableBroadcastReceiver()
-                    mHint?.text = getString(R.string.stop_text)
-
-                }
-
-            }
-        }
-    }
-
-    private fun onButtonLongPressed() {
-        mPlusOneButton?.setOnLongClickListener({
-            if (mPlusOneButton?.text!!.toString() == getString(R.string.stop))
-                mPlusOneButton?.text = getString(R.string.start)
-            disableBroadcastReceiver()
-            Utils.Companion.isBackAllow = true
-            mHint?.text = getString(R.string.start_text)
-            openLogListFragment()
-            return@setOnLongClickListener true
-        })
-    }
 
     override fun onPause() {
         super.onPause()
-        val activityManager = context
-                .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-
-        activityManager.moveTaskToFront(activity.taskId, 0)
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-    }
-
-    override fun onDetach() {
-        super.onDetach()
+        val activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        activityManager.moveTaskToFront(activity!!.taskId, 0)
     }
 
 
     companion object {
-        // TODO: Rename parameter arguments, choose names that match
         // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
         private const val ARG_PARAM1 = "param1"
         private const val ARG_PARAM2 = "param2"
@@ -124,7 +72,6 @@ class BikersMainFragment : Fragment() {
          * @param param2 Parameter 2.
          * @return A new instance of fragment BikersMainFragment.
          */
-        // TODO: Rename and change types and number of parameters
         fun newInstance(param1: String, param2: String): BikersMainFragment {
             val fragment = BikersMainFragment()
             val args = Bundle()
@@ -137,7 +84,7 @@ class BikersMainFragment : Fragment() {
 
     private fun enableBroadcastReceiver() {
 
-        val receiver = ComponentName(context, CallBaring::class.java)
+        val receiver = ComponentName(context!!, CallBaring::class.java)
         val pm = context?.packageManager
 
         pm?.setComponentEnabledSetting(receiver,
@@ -150,7 +97,7 @@ class BikersMainFragment : Fragment() {
      * This method disables the Broadcast receiver registered in the AndroidManifest file.
      */
     private fun disableBroadcastReceiver() {
-        val receiver = ComponentName(context, CallBaring::class.java)
+        val receiver = ComponentName(context!!, CallBaring::class.java)
         val pm = context?.packageManager
         pm?.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
@@ -159,39 +106,64 @@ class BikersMainFragment : Fragment() {
     }
 
     private fun openLogListFragment() {
-        activity.supportFragmentManager
+        activity!!.supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
                 .replace(R.id.details_fragment, CallLogListFragment.newInstance(10))
                 .commitAllowingStateLoss()
     }
 
-    private fun checkAndRequestPermissions(): Boolean {
-        val phonepermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
-        val phonestatepermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)
-        val readcontactsLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
-        val writecontactspermission = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CONTACTS)
+    override fun onClick(v: View?) {
+        when (v!!.id) {
+            R.id.plus_one_button -> {
+                if (Utils.checkAndRequestPermissions(context!!)) {
+                    if (mPlusOneButton?.text!!.toString() == getString(R.string.start)) {
+                        Utils.isBackAllow = false
+                        mPlusOneButton?.text = getString(R.string.stop)
+                        enableBroadcastReceiver()
+                        mHint?.text = getString(R.string.stop_text)
 
+                    }
 
-        val listPermissionsNeeded = ArrayList<String>()
+                }
 
-        if (phonepermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.CALL_PHONE)
+            }
+            R.id.plus_two_button -> {
+                if (Utils.checkAndRequestPermissions(context!!)) {
+                    val i = Intent(activity, RouteActivity::class.java)
+                    startActivity(i)
+                }
+
+            }
         }
-        if (phonestatepermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.READ_PHONE_STATE)
+    }
+
+    override fun onLongClick(v: View?): Boolean {
+        var isLongClicked = false
+        when (v!!.id) {
+            R.id.plus_one_button -> {
+                isLongClicked = true
+                if (mPlusOneButton?.text!!.toString() == getString(R.string.stop))
+                    mPlusOneButton?.text = getString(R.string.start)
+                disableBroadcastReceiver()
+                Utils.isBackAllow = true
+                mHint?.text = getString(R.string.start_text)
+                openLogListFragment()
+            }
         }
-        if (readcontactsLocation != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.READ_CONTACTS)
-        }
-        if (writecontactspermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.WRITE_CONTACTS)
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(activity, listPermissionsNeeded.toTypedArray(), SplashActivity.REQUEST_ID_MULTIPLE_PERMISSIONS)
-            return false
-        }
-        return true
+        return isLongClicked
+    }
+
+    private fun initUi(){
+        //Find the +1 button
+        mPlusOneButton = view!!.findViewById<View>(R.id.plus_one_button) as Button
+        mPlusTwoButton = view!!.findViewById<View>(R.id.plus_two_button) as Button
+        mHint = view!!.findViewById<View>(R.id.tv_hint) as TextView
+
+        mPlusTwoButton?.setOnClickListener(this)
+        mPlusOneButton?.setOnClickListener(this)
+        mPlusOneButton?.setOnLongClickListener(this)
+
     }
 
 }

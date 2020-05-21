@@ -9,10 +9,8 @@ import com.bikersmode.database.UsersDBHelper
 import com.bikersmode.utility.Utils
 
 class CallBaring : BroadcastReceiver() {
-//    private var number: String? = null
-//    private var name: String? = null
-//    private var time: String? = null
-    lateinit var usersDBHelper : UsersDBHelper
+    private lateinit var usersDBHelper : UsersDBHelper
+    @Suppress("DEPRECATION")
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != "android.intent.action.PHONE_STATE")
             return
@@ -20,11 +18,10 @@ class CallBaring : BroadcastReceiver() {
         {
             usersDBHelper = UsersDBHelper(context)
             // Fetch the number of incoming call
-//            number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
-//            name = Utils.Companion.getContactName(intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER),context)
-//            time = Utils.Companion.getContactTime()
-            disconnectPhoneItelephony(context,intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER))
-            usersDBHelper.insertUser(UserModel(mobileNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER),name = Utils.Companion.getContactName(intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER),context),time = Utils.Companion.getContactTime()))
+            if(null != intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)) {
+                disconnectPhoneItelephony(context, intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)!!)
+                usersDBHelper.insertUser(UserModel(mobileNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)!!, name = Utils.getContactName(intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)!!, context), time = Utils.getContactTime()))
+            }
             return
         }
     }

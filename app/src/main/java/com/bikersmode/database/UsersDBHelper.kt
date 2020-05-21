@@ -10,9 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper
 
 class UsersDBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-
-        db?.execSQL(SQL_DELETE_ENTRIES)
+        db.execSQL(SQL_DELETE_ENTRIES)
         onCreate(db)
     }
 
@@ -55,12 +53,12 @@ class UsersDBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
         return true
     }
 
-    fun readUser(userid: String): ArrayList<UserModel> {
+    fun readUser(userId: String): ArrayList<UserModel> {
         val users = ArrayList<UserModel>()
         val db = writableDatabase
         var cursor: Cursor? = null
         try {
-            cursor = db.rawQuery("select * from " + DBContract.UserEntry.TABLE_NAME + " WHERE " + DBContract.UserEntry.COLUMN_MOBILE_NUMBER + "='" + userid + "'", null)
+            cursor = db.rawQuery("select * from " + DBContract.UserEntry.TABLE_NAME + " WHERE " + DBContract.UserEntry.COLUMN_MOBILE_NUMBER + "='" + userId + "'", null)
         } catch (e: SQLiteException) {
             // if table not yet present, create it
             db.execSQL(SQL_CREATE_ENTRIES)
@@ -70,11 +68,11 @@ class UsersDBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
         var name: String
         var age: String
         if (cursor!!.moveToFirst()) {
-            while (cursor.isAfterLast == false) {
+            while (!cursor.isAfterLast) {
                 name = cursor.getString(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_NAME))
                 age = cursor.getString(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_TIME))
 
-                users.add(UserModel(userid, name, age))
+                users.add(UserModel(userId, name, age))
                 cursor.moveToNext()
             }
         }
@@ -96,7 +94,7 @@ class UsersDBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
         var name: String
         var age: String
         if (cursor!!.moveToFirst()) {
-            while (cursor.isAfterLast == false) {
+            while (!cursor.isAfterLast) {
                 userid = cursor.getString(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_MOBILE_NUMBER))
                 name = cursor.getString(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_NAME))
                 age = cursor.getString(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_TIME))

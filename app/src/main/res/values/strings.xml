@@ -5,4 +5,5 @@
     <string name="call_list">Call List</string>
     <string name="start_text">Click on above Image for start your ride.</string>
     <string name="stop_text">Long press on above Image for end your ride.</string>
+    <string name="title_activity_route">Route</string>
 </resources>
