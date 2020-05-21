@@ -2,25 +2,46 @@ package com.bikersmode
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.TextUtils
+import android.widget.Toast
+import com.google.android.gms.location.places.GeoDataClient
+import com.google.android.gms.location.places.Places.getGeoDataClient
+import com.google.android.libraries.maps.CameraUpdateFactory
+import com.google.android.libraries.maps.GoogleMap
+import com.google.android.libraries.maps.OnMapReadyCallback
+import com.google.android.libraries.maps.SupportMapFragment
+import com.google.android.libraries.maps.model.LatLng
+import com.google.android.libraries.maps.model.MarkerOptions
+import com.google.android.libraries.places.*
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 
 class RouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private lateinit var mGeoDataClient: GeoDataClient
+    private lateinit var mPlacesClient : PlacesClient
+    private lateinit var mApi: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_route)
+        mApi = getString(R.string.google_maps_key)
+        if(TextUtils.isEmpty(mApi)){
+            Toast.makeText(this@RouteActivity,"Error in api key",Toast.LENGTH_SHORT).show()
+            return
+        }
+        if(!Places.isInitialized()){
+            Places.initialize(this@RouteActivity,mApi)
+        }
+
+//        mPlacesClient = Places.createClient(this)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+//        mGeoDataClient = Places.getGeoDataClient(this, null);
     }
 
     /**
